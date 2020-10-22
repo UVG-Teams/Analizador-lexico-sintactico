@@ -58,7 +58,7 @@ class Analizer(object):
     @staticmethod
     def p_expr(p):
         'expr : ALPHABET'
-        p[0] = p[1]
+        p[0] = p[1] 
 
     @staticmethod
     def p_or(p):
@@ -99,7 +99,7 @@ class Analizer(object):
     def get_value(self, data):
         return self.parser.parse(data)
 
-    def tokenss(self):
+    def get_tokens(self):
         tokens = []
         while True:
             token = self.lexer.token()
@@ -127,8 +127,8 @@ while True:
         G = nx.DiGraph()
         expresion = input("Ingrese una expresion a graficar: ")
         analizer.analize(expresion)
-        tokens = analizer.tokenss()
-        relations = []
+        tokens = analizer.get_tokens()
+
         for i in range(len(tokens)):
             token = tokens[i]
             if i-1 >= 0:
@@ -138,41 +138,34 @@ while True:
 
             if token.type == "NEGATION":
                 if next_token.type == "LPAREN":
-                    relations.append((
-                        "{con}:{label}".format(con = i, label = token.value),
-                        "{con}:{label}".format(con = i+3, label = tokens[i+3].value)
-                    ))
+                    G.add_edge(f'{i}.{token.value}', f'{i+3}.{tokens[i+3].value}')
                 else:
-                    relations.append((
-                        "{con}:{label}".format(con = i, label = token.value),
-                        "{con}:{label}".format(con = i+1, label = next_token.value)
-                    ))
-            elif token.type == "SIMPLIES" or token.type == "IMPLIES" or token.type == "AND" or token.type == "OR":
-                if next_token.type == "LPAREN":
-                    relations.append((
-                        "{con}:{label}".format(con = i, label = token.value),
-                        "{con}:{label}".format(con = i+3, label = tokens[i+3].value)
-                    ))
-                else:
-                    relations.append((
-                        "{con}:{label}".format(con = i, label = token.value),
-                        "{con}:{label}".format(con = i+1, label = next_token.value)
-                    ))
-                if previous_token.type == "RPAREN":
-                    relations.append((
-                        "{con}:{label}".format(con = i, label = token.value),
-                        "{con}:{label}".format(con = i-3, label = tokens[i-3].value)
-                    ))
-                else:
-                    relations.append((
-                        "{con}:{label}".format(con = i, label = token.value),
-                        "{con}:{label}".format(con = i-1, label = previous_token.value)
-                    ))
+                    G.add_edge(f'{i}.{token.value}', f'{i+1}.{next_token.value}')
 
-        print(relations)
-        G.add_edges_from(relations)
-        plt.subplot(121)
-        nx.draw(G, with_labels=True, font_size="8")
+            elif token.type == "SIMPLIES" \
+                or token.type == "IMPLIES" \
+                or token.type == "AND" \
+                or token.type == "OR":
+
+                if next_token.type == "LPAREN":
+                    G.add_edge(f'{i}.{token.value}', f'{i+3}.{tokens[i+3].value}')
+                else:
+                    G.add_edge(f'{i}.{token.value}', f'{i+1}.{next_token.value}')
+
+                if previous_token.type == "RPAREN":
+                    G.add_edge(f'{i}.{token.value}', f'{i-3}.{tokens[i-3].value}')
+                else:
+                    G.add_edge(f'{i}.{token.value}', f'{i-1}.{previous_token.value}')
+        
+        options = {
+            'node_color': '#3759D2',
+            'node_size': 3000,
+            'width': 3,
+        }
+
+        print(G.edges)
+        plt.subplot(111)
+        nx.draw(G, with_labels=True, font_size="16", **options)
         plt.show()
 
     elif (option == 9):
