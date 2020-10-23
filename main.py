@@ -73,7 +73,7 @@ class Analizer(object):
     @staticmethod
     def p_implies(p):
         'expr : expr IMPLIES expr'
-        p[0] = (not p[1]) and p[3]
+        p[0] = (not p[1]) or p[3]
 
     @staticmethod
     def p_simplies(p):
